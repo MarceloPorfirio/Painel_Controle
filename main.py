@@ -6,16 +6,14 @@ class Painel:
         
         self.main_page()
         
-    def table_container(self):
-        return ft.Container
+    # def table_container(self):
+    #     return ft.Container
              
     def main_page(self):
         name = ft.TextField(label='Digite seu nome')
         fone = ft.TextField(label='Digite seu telefone')
         email = ft.TextField(label='Digite seu email')
         adress = ft.TextField(label='Digite seu endereço')
-        
-        
         
         
         container_cadastro = ft.Column(
@@ -27,7 +25,7 @@ class Painel:
                     columns=[
                         ft.DataColumn(label=ft.Text("ID")),
                         ft.DataColumn(label=ft.Text("Nome")),
-                        ft.DataColumn(label=ft.Text("Telefone"),numeric=True),
+                        ft.DataColumn(label=ft.Text("Telefone")),
                         ft.DataColumn(label=ft.Text("Email")),
                         ft.DataColumn(label=ft.Text('Endereço'))
                     ],
