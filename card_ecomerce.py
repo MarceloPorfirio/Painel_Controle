@@ -3,6 +3,8 @@ import flet as ft
 def main(page:ft.Page):
     page.bgcolor = ft.colors.BLACK
     page.scroll = ft.ScrollMode.AUTO
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     
     
     def change_main_image(e):
