@@ -145,7 +145,6 @@ def main(page:ft.Page):
         try:
             cursor.execute("INSERT INTO cadastrar (name,age) VALUES (?, ? )",(name.value,age.value))
             conn.commit()
-            
             tabela.rows.clear()
             load_data()
             
