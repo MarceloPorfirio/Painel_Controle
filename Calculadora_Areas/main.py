@@ -39,7 +39,7 @@ def main(page:ft.Page):
                            icon=ft.icons.HOME 
                         ),
                          ft.NavigationDrawerDestination(
-                           label='Novo Cliente',
+                           label='Calculo de área',
                            icon=ft.icons.PERSON_2_ROUNDED 
                         ),
                           ft.NavigationDrawerDestination(
