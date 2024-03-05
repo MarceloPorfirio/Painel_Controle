@@ -1,5 +1,5 @@
 import flet as ft
-
+total_result = ""
 
 def main(page:ft.Page):
     
@@ -8,7 +8,12 @@ def main(page:ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     
     def calc_area(e):
-        ...
+        area1_value = float(area1.value) 
+        area2_value = float(area2.value)
+        calculo_area.content.value = str(f'{area1_value * area2_value}m²') 
+        
+        page.update()
+        
         
     title = ft.Text('Cálculo Facilitado para construção',size=30)
     area_container = ft.Container(
@@ -28,7 +33,7 @@ def main(page:ft.Page):
             ],
             
         ),
-            ft.Container(
+           calculo_area :=  ft.Container(
                 width=100,
                 height=100,
                 margin=ft.margin.only(bottom=40,left=40),
@@ -36,14 +41,23 @@ def main(page:ft.Page):
                 border=ft.border.all(width=2),
                 alignment=ft.alignment.center,
                 # bgcolor=ft.colors.RED,
-                content=ft.Text('Resultado')
-            )
+                content=ft.Text(size=20)
+                
+            ),
+           
         ]),
         
         
         
         
         
+    )
+    walls_container = ft.Container(
+        ft.Column(
+               controls=[
+                   ft.Text('Bem')
+               ]
+           )
     )
     
     main_container = ft.Container(
