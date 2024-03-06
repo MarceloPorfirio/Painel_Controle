@@ -10,8 +10,7 @@ def main(page:ft.Page):
     def calc_area(e):
         area1_value = float(area1.value) 
         area2_value = float(area2.value)
-        calculo_area.content.value = str(f'{area1_value * area2_value}m²') 
-        
+        calculo_area.content.value = str(round(area1_value * area2_value, 2)) + 'm²'
         page.update()
         
         
@@ -21,9 +20,7 @@ def main(page:ft.Page):
         border=ft.border.all(width=2),
         border_radius=ft.border_radius.all(10),
         padding=10,
-        content= ft.Row(
-        
-            [
+        content= ft.Row([
             ft.Column(
             
             controls=[
@@ -45,19 +42,29 @@ def main(page:ft.Page):
                 
             ),
            
+           
         ]),
-        
-        
-        
-        
+  
         
     )
-    walls_container = ft.Container(
-        ft.Column(
-               controls=[
-                   ft.Text('Bem')
-               ]
-           )
+    
+    wall_container = ft.Container(
+        width=500,
+        border=ft.border.all(width=2),
+        border_radius=ft.border_radius.all(10),
+        padding=10,
+        content= ft.Row([
+            ft.Column(
+            
+            controls=[
+                area1 := ft.TextField(label='Area 1'),
+                area2 := ft.TextField(label='Area 2'),
+                ft.ElevatedButton('Calcular',on_click=calc_area)
+            ],
+            
+        ),
+        ])
+        
     )
     
     main_container = ft.Container(
@@ -67,6 +74,8 @@ def main(page:ft.Page):
             controls=[
                 
                 area_container,
+                wall_container
+                
             ]
         )
     )
