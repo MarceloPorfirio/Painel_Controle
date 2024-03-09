@@ -57,7 +57,9 @@ def main(page:ft.Page):
             ft.Column(
             
             controls=[
-                area1 := ft.TextField(label='Area 1'),
+                ft.Text('Paredes',size=20),
+                n_paredes := ft.TextField(label ='Numero de paredes'),
+                area1 := ft.TextField(label='Altura'),
                 area2 := ft.TextField(label='Area 2'),
                 ft.ElevatedButton('Calcular',on_click=calc_area)
             ],
