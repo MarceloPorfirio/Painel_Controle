@@ -4,7 +4,20 @@ def main(page: ft.Page):
     page.bgcolor = ft.colors.WHITE
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.bgcolor = ft.colors.BLUE_700
 
+    page.appbar = ft.AppBar(
+        leading=ft.Icon(ft.icons.PALETTE),
+        leading_width=20,
+        title=ft.Text('Pokemon'),
+        bgcolor=ft.colors.BLUE_600,
+        actions=[
+            ft.IconButton(ft.icons.FILTER_3)
+        ]
+        
+    )
+
+    
     # Lista de imagens das cartas, nomeadas pelo nome dos Pokémon
     images = {
         'squirtle': 'card_1.png',
@@ -23,6 +36,11 @@ def main(page: ft.Page):
             card.content.scale.scale -= card.data * 0.1
             card.content.opacity -= card.data * 0.3
         cards.update()
+
+    # Função para fechar o diálogo
+    def close_dialog(e):
+        page.dialog.open = False
+        page.update()
 
     # Função para exibir a carta do Pokémon pesquisado
     def search_pokemon(name, dialog):
@@ -45,7 +63,7 @@ def main(page: ft.Page):
                 controls=[
                     selected_card,
                     ft.Row(controls=[
-                        ft.TextButton("Fechar", on_click=lambda e: page.dialog.close())
+                        ft.TextButton("Fechar", on_click=close_dialog)
                     ], alignment=ft.MainAxisAlignment.END)
                 ]
             )
@@ -54,7 +72,7 @@ def main(page: ft.Page):
                 controls=[
                     ft.Text(f"{name.capitalize()} não encontrado.", color=ft.colors.RED),
                     ft.Row(controls=[
-                        ft.TextButton("Fechar", on_click=lambda e: page.dialog.close())
+                        ft.TextButton("Fechar", on_click=close_dialog)
                     ], alignment=ft.MainAxisAlignment.END)
                 ]
             )
@@ -133,7 +151,7 @@ def main(page: ft.Page):
         margin=ft.margin.only(bottom=40),
         content=ft.Image(
             src='logo_poke.png',
-            width=300
+            width=280
         )
     )
     layout = ft.Row(controls=[cards], alignment=ft.MainAxisAlignment.CENTER)
@@ -147,7 +165,7 @@ def main(page: ft.Page):
 
     page.add(title, layout)
     page.floating_action_button = search_button
-
+  
     # Aplicando animações iniciais às cartas
     for card in cards.controls:
         card.content.offset.x += card.data * 0.2
