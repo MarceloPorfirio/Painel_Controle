@@ -7,12 +7,14 @@ def main(page: ft.Page):
     page.bgcolor = ft.colors.BLUE_700
 
     page.appbar = ft.AppBar(
+        
         leading=ft.Icon(ft.icons.PALETTE),
         leading_width=20,
-        title=ft.Text('Pokemon'),
+        title=ft.Text('Minha Coleção',size=28,weight=ft.FontWeight.BOLD,color='white'),
+        center_title=True,
         bgcolor=ft.colors.BLUE_600,
         actions=[
-            ft.IconButton(ft.icons.FILTER_3)
+            ft.PopupMenuButton()
         ]
         
     )
