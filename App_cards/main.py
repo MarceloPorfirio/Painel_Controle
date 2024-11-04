@@ -1,28 +1,36 @@
 import flet as ft
+import time
+
 
 def main(page: ft.Page):
     page.bgcolor = ft.colors.WHITE
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.bgcolor = ft.colors.BLUE_700
-
+    
+    # Loader
+    loader = ft.ProgressRing(visible=False)
+    page.add(loader)
 
 
     # Função para abrir o AlertDialog de adicionar Pokémon
     def open_add_dialog(e):
-        text_field_name = ft.TextField(label="Nome do Pokémon", autofocus=True)
-        text_field_url = ft.TextField(label="url da imagem")
+        text_field_name = ft.TextField(label="Pokémon Name", autofocus=True)
+        text_field_url = ft.TextField(label="url")
+
+    
 
         actions = ft.Row(
             controls=[
-                ft.TextButton("Cancelar", on_click=close_dialog),
-                ft.TextButton("Adicionar",on_click=lambda e: add_pokemon(text_field_name.value, text_field_url.value, dialog)),
+                ft.TextButton("Cancel", on_click=close_dialog),
+                ft.TextButton("Add",on_click=lambda e: add_pokemon(text_field_name.value, text_field_url.value, dialog)),
                 
             ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN
         )
+        
        
         dialog = ft.AlertDialog(
-            title=ft.Text("Adicionar Pokémon"),
+            title=ft.Text("Add Pokémon"),
             content=ft.Column(
                 width=300,
                 height=200,
@@ -30,6 +38,14 @@ def main(page: ft.Page):
             ),
             
         )
+         # Centralizando o loader
+        loader_container = ft.Container(
+            content=loader,
+            alignment=ft.alignment.center,  # Alinhamento centralizado
+            padding=10,  # Espaçamento interno
+        )
+        # Atualiza o conteúdo do diálogo com o loader centralizado
+        dialog.content.controls.insert(2, loader_container)  # Insere o loader no índice 2
         page.dialog = dialog
         dialog.open = True
         page.update()
@@ -39,7 +55,7 @@ def main(page: ft.Page):
         
         # leading=ft.Icon(ft.icons.PALETTE),
         leading_width=20,
-        title=ft.Text('Minha Coleção',size=28,weight=ft.FontWeight.BOLD,color='white'),
+        title=ft.Text('My Collection',size=28,weight=ft.FontWeight.BOLD,color='white'),
         center_title=True,
         bgcolor=ft.colors.BLUE_700,
         actions=[
@@ -68,6 +84,7 @@ def main(page: ft.Page):
         'vulpix': 'card_7.png',
     }
 
+    
     # Função para realizar animações nas cartas
     def change_cards():
         for card in cards.controls:
@@ -81,8 +98,24 @@ def main(page: ft.Page):
         page.dialog.open = False
         page.update()
 
+    # Função para exibir alerta de sucesso
+    def show_success_alert():
+        success_dialog = ft.AlertDialog(
+            title=ft.Text("Sucess!"),
+            content=ft.Text("Pokémon added to the collection."),
+            actions=[ft.TextButton("Ok", on_click=close_dialog)],
+        )
+        page.dialog = success_dialog
+        success_dialog.open = True
+        page.update()
+
+    
      # Função para adicionar novo Pokémon ao dicionário e atualizar a exibição
     def add_pokemon(name, url, dialog):
+        # Ativar loader
+        loader.visible = True
+        page.update()
+        time.sleep(2)
         # Adiciona ao dicionário `images`
         images[name.lower()] = url
         
@@ -107,8 +140,10 @@ def main(page: ft.Page):
             )
         )
         
-        # Fecha o diálogo e atualiza a página
+        # Desativar loader e exibir alerta de sucesso
+        loader.visible = False
         close_dialog(None)
+        show_success_alert()
         cards.update()
         page.update()
 
@@ -135,7 +170,7 @@ def main(page: ft.Page):
                 controls=[
                     selected_card,
                     ft.Row(controls=[
-                        ft.TextButton("Fechar", on_click=close_dialog)
+                        ft.TextButton("Close", on_click=close_dialog)
                     ], alignment=ft.MainAxisAlignment.END)
                 ]
             )
@@ -144,9 +179,9 @@ def main(page: ft.Page):
                 width=200,
                 height=100,
                 controls=[
-                    ft.Text(f"{name.capitalize()} não encontrado.", color=ft.colors.RED,size=20,weight=ft.FontWeight.BOLD),
+                    ft.Text(f"{name.capitalize()} Not Found.", color=ft.colors.RED,size=20,weight=ft.FontWeight.BOLD),
                     ft.Row(controls=[
-                        ft.TextButton("Fechar", on_click=close_dialog)
+                        ft.TextButton("Close", on_click=close_dialog)
                     ], alignment=ft.MainAxisAlignment.END)
                 ]
             )
@@ -154,11 +189,11 @@ def main(page: ft.Page):
 
     # Função para abrir o AlertDialog de busca
     def open_search_dialog(e):
-        text_field = ft.TextField(label="Nome do Pokémon", autofocus=True)
-        search_button = ft.TextButton("Buscar", on_click=lambda e: search_pokemon(text_field.value, dialog))
+        text_field = ft.TextField(label="Pokémon Name", autofocus=True)
+        search_button = ft.TextButton("Search", on_click=lambda e: search_pokemon(text_field.value, dialog))
         
         dialog = ft.AlertDialog(
-            title=ft.Text("Buscar Pokémon"),
+            title=ft.Text("Search for Pokemon"),
             content=ft.Column(
                 width=200,
                 height=100,
@@ -236,7 +271,7 @@ def main(page: ft.Page):
     # Adicionando o FloatingActionButton
     search_button = ft.FloatingActionButton(
         icon=ft.icons.SEARCH,
-        tooltip="Buscar Carta",
+        tooltip="Search for Card",
         on_click=open_search_dialog
     )
 
