@@ -106,11 +106,11 @@ def main(page: ft.Page):
 
     # Elementos de entrada para o serviço por kg
     servico_kg = ft.Dropdown(
-        label="Serviço por Kg",
-        options=[ft.dropdown.Option("Completo"), ft.dropdown.Option("Secagem"), ft.dropdown.Option("Máquina")],
+        label="Serviço",
+        options=[ft.dropdown.Option("Completo"),ft.dropdown.Option("Esfregar"), ft.dropdown.Option("Máquina"), ft.dropdown.Option("Secagem")],
     )
-    quantidade_kg = ft.TextField(label="Quantidade (Kg)", width=100)
-    quantidade_total_pecas = ft.TextField(label="Quantidade Total de Peças", width=150)
+    quantidade_kg = ft.TextField(label="Peso (kg)", width=150)
+    quantidade_total_pecas = ft.TextField(label="Total de Peças", width=150)
     botao_adicionar_kg = ft.ElevatedButton("Adicionar Serviço por Kg", on_click=adicionar_por_kg)
 
     tipo_peca_kg = ft.Dropdown(
@@ -123,7 +123,7 @@ def main(page: ft.Page):
 
     servico_peca = ft.Dropdown(
         label="Serviço por Peça",
-        options=[ft.dropdown.Option("Lavagem à mão"), ft.dropdown.Option("Passagem")],
+        options=[ft.dropdown.Option("Lavagem"), ft.dropdown.Option("Passagem"),ft.dropdown.Option("Secagem")],
     )
     tipo_peca = ft.Dropdown(
         label="Tipo de Peça",
@@ -133,23 +133,42 @@ def main(page: ft.Page):
     preco_peca = ft.TextField(label="Preço fixo por Peça", width=100, value="15.0")
     botao_adicionar_peca = ft.ElevatedButton("Adicionar por Peça", on_click=adicionar_por_peca)
 
-    # Criar o painel de expansão para detalhar peças
-    expansion_panel = ft.ExpansionPanelList(
-        expand_icon_color=ft.colors.AMBER,
-        elevation=8,
-        divider_color=ft.colors.AMBER,
-        controls=[
-            ft.ExpansionPanel(
-                header=ft.ListTile(title=ft.Text("Detalhar Peças por Kg")),
-                content=ft.Column([
-                    tipo_peca_kg,
-                    quantidade_peca_kg,
-                    botao_adicionar_peca_kg,
-                    lista_detalhes_pecas
-                ])
-            )
-        ]
-    )
+    # Container com duas colunas: ExpansionPanel à esquerda e lista de detalhes à direita
+    detalhes_container = ft.Container(
+    content=ft.Row([
+        # Coluna esquerda com o ExpansionPanel
+        ft.Column(
+            controls=[
+                ft.ExpansionPanelList(
+                    expand_icon_color=ft.colors.AMBER,
+                    width=300,  # Largura para a coluna esquerda com o painel de expansão
+                    elevation=8,
+                    divider_color=ft.colors.AMBER,
+                    controls=[
+                        ft.ExpansionPanel(
+                            header=ft.ListTile(title=ft.Text("Detalhar Peças por Kg")),
+                            content=ft.Container(
+                                content=ft.Column([
+                                    tipo_peca_kg,
+                                    quantidade_peca_kg,
+                                    botao_adicionar_peca_kg,
+                                ])
+                            )
+                        )
+                    ]
+                )
+            ]
+        ),
+        # Coluna direita com a lista de detalhes das peças
+        ft.Column(
+            controls=[
+                ft.Text("Lista de Detalhes das Peças:"),
+                lista_detalhes_pecas  # Exibe a lista de detalhes fora do painel de expansão
+            ]
+        )
+    ])
+)
+
 
     # Tabela para mostrar os serviços adicionados
     tabela_pedidos = ft.DataTable(
@@ -166,8 +185,10 @@ def main(page: ft.Page):
     # Layout principal
     page.add(
         ft.Text("Serviços por Kg"),
-        ft.Row([servico_kg, quantidade_kg, quantidade_total_pecas, botao_adicionar_kg]),
-        expansion_panel,  # Adicionando o painel de expansão
+        ft.Row([servico_kg, quantidade_kg, quantidade_total_pecas]),
+        detalhes_container,  # Adicionando o painel de expansão
+        ft.Divider(color=ft.colors.TRANSPARENT),
+        botao_adicionar_kg,
         ft.Divider(),
         ft.Text("Serviços por Peça"),
         ft.Row([servico_peca, tipo_peca, quantidade_peca, preco_peca, botao_adicionar_peca]),
