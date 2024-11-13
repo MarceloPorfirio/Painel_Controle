@@ -10,30 +10,37 @@ def main(page: ft.Page):
     pecas_por_kg = []
 
     def atualizar_lista():
-        lista_pedidos.controls.clear()
+        tabela_pedidos.rows.clear()
         for item in servicos_adicionados:
-            # Ícone para visualizar detalhes das peças por Kg
-            icon_button = ft.IconButton(
-                icon=ft.icons.VISIBILITY,
-                tooltip="Ver detalhes das peças",
-                on_click=lambda e, item=item: mostrar_detalhes_pecas(item["detalhes_pecas"]) if "detalhes_pecas" in item else None
-            )
-
             if "peca" in item:
-                lista_pedidos.controls.append(
-                    ft.Row(
-                        [ft.Text(f"{item['tipo']} - {item['peca']} - {item['quantidade']} ({item['unidade']}) - R$ {item['preco']}")]
-                    )
+                tabela_pedidos.rows.append(
+                    ft.DataRow(cells=[
+                        ft.DataCell(ft.Text(item["tipo"])),
+                        ft.DataCell(ft.Text(item["peca"])),
+                        ft.DataCell(ft.Text(item["quantidade"])),
+                        ft.DataCell(ft.Text(item["unidade"])),
+                        ft.DataCell(ft.Text(f"R$ {item['preco']}")),
+                        ft.DataCell(ft.Text("-"))  # Sem detalhes para serviços por peça
+                    ])
                 )
             else:
-                lista_pedidos.controls.append(
-                    ft.Row(
-                        [ft.Text(f"{item['tipo']} - {item['quantidade_kg']} Kg - R$ {item['preco']}"), icon_button]
-                    )
+                detalhes_button = ft.IconButton(
+                    icon=ft.icons.VISIBILITY,
+                    tooltip="Ver detalhes das peças",
+                    on_click=lambda e, item=item: mostrar_detalhes_pecas(item["detalhes_pecas"]) if "detalhes_pecas" in item else None
+                )
+                tabela_pedidos.rows.append(
+                    ft.DataRow(cells=[
+                        ft.DataCell(ft.Text(item["tipo"])),
+                        ft.DataCell(ft.Text(f"{item['quantidade_kg']} Kg")),
+                        ft.DataCell(ft.Text(item["quantidade_total"])),
+                        ft.DataCell(ft.Text(item["unidade"])),
+                        ft.DataCell(ft.Text(f"R$ {item['preco']}")),
+                        ft.DataCell(detalhes_button)
+                    ])
                 )
         page.update()
 
-    # Função para exibir um dialog com detalhes das peças por Kg
     def mostrar_detalhes_pecas(detalhes_pecas):
         detalhes_texto = "\n".join([f"{p['peca']} - {p['quantidade']} peças" for p in detalhes_pecas])
         dialog = ft.AlertDialog(
@@ -45,7 +52,6 @@ def main(page: ft.Page):
         dialog.open = True
         page.update()
 
-    # Função para adicionar peça ao detalhe de peças por Kg
     def adicionar_peca_por_kg(e):
         peca_detalhada = {
             "peca": tipo_peca_kg.value,
@@ -54,7 +60,6 @@ def main(page: ft.Page):
         pecas_por_kg.append(peca_detalhada)
         atualizar_detalhes_pecas()
 
-    # Função para atualizar a exibição das peças por Kg detalhadas
     def atualizar_detalhes_pecas():
         lista_detalhes_pecas.controls.clear()
         for p in pecas_por_kg:
@@ -63,7 +68,6 @@ def main(page: ft.Page):
             )
         page.update()
 
-    # Função para adicionar o serviço por Kg com os detalhes das peças e quantidade total
     def adicionar_por_kg(e):
         try:
             quantidade_kg_valor = float(quantidade_kg.value)
@@ -74,12 +78,7 @@ def main(page: ft.Page):
             page.add(ft.Text("A quantidade de kg deve ser um número válido", color="red"))
             return
 
-        if servico_kg.value == "Máquina":
-            preco_por_kg = 12.00
-        elif servico_kg.value == "Completo":
-            preco_por_kg = 19.90
-        else:
-            preco_por_kg = 0.0
+        preco_por_kg = 12.00 if servico_kg.value == "Máquina" else 19.90 if servico_kg.value == "Completo" else 0.0
 
         servico = {
             "tipo": servico_kg.value,
@@ -94,7 +93,6 @@ def main(page: ft.Page):
         atualizar_detalhes_pecas()
         atualizar_lista()
 
-    # Função para adicionar serviço por peça
     def adicionar_por_peca(e):
         servico = {
             "tipo": servico_peca.value,
@@ -115,56 +113,67 @@ def main(page: ft.Page):
     quantidade_total_pecas = ft.TextField(label="Quantidade Total de Peças", width=150)
     botao_adicionar_kg = ft.ElevatedButton("Adicionar Serviço por Kg", on_click=adicionar_por_kg)
 
-    # Campos para detalhar peças no serviço por Kg
     tipo_peca_kg = ft.Dropdown(
         label="Tipo de Peça",
-        options=[
-            ft.dropdown.Option("Bermuda"),
-            ft.dropdown.Option("Camiseta"),
-            ft.dropdown.Option("Cueca"),
-            ft.dropdown.Option("Meia")
-        ]
+        options=[ft.dropdown.Option("Bermuda"), ft.dropdown.Option("Camiseta"), ft.dropdown.Option("Cueca"), ft.dropdown.Option("Meia")]
     )
     quantidade_peca_kg = ft.TextField(label="Quantidade", width=100)
     botao_adicionar_peca_kg = ft.ElevatedButton("Adicionar Peça", on_click=adicionar_peca_por_kg)
-
-    # Lista para mostrar os detalhes das peças adicionadas ao serviço por Kg
     lista_detalhes_pecas = ft.Column(scroll="adaptive")
 
-    # Elementos de entrada para o serviço por peça
     servico_peca = ft.Dropdown(
         label="Serviço por Peça",
         options=[ft.dropdown.Option("Lavagem à mão"), ft.dropdown.Option("Passagem")],
     )
     tipo_peca = ft.Dropdown(
         label="Tipo de Peça",
-        options=[
-            ft.dropdown.Option("Casaco"),
-            ft.dropdown.Option("Jaqueta"),
-            ft.dropdown.Option("Edredom"),
-            ft.dropdown.Option("Cobertor")
-        ]
+        options=[ft.dropdown.Option("Casaco"), ft.dropdown.Option("Jaqueta"), ft.dropdown.Option("Edredom"), ft.dropdown.Option("Cobertor")]
     )
     quantidade_peca = ft.TextField(label="Quantidade (Peça)", width=100)
     preco_peca = ft.TextField(label="Preço fixo por Peça", width=100, value="15.0")
     botao_adicionar_peca = ft.ElevatedButton("Adicionar por Peça", on_click=adicionar_por_peca)
 
-    # Lista para mostrar os serviços adicionados
-    lista_pedidos = ft.Column(scroll="adaptive")
+    # Criar o painel de expansão para detalhar peças
+    expansion_panel = ft.ExpansionPanelList(
+        expand_icon_color=ft.colors.AMBER,
+        elevation=8,
+        divider_color=ft.colors.AMBER,
+        controls=[
+            ft.ExpansionPanel(
+                header=ft.ListTile(title=ft.Text("Detalhar Peças por Kg")),
+                content=ft.Column([
+                    tipo_peca_kg,
+                    quantidade_peca_kg,
+                    botao_adicionar_peca_kg,
+                    lista_detalhes_pecas
+                ])
+            )
+        ]
+    )
+
+    # Tabela para mostrar os serviços adicionados
+    tabela_pedidos = ft.DataTable(
+        columns=[
+            ft.DataColumn(label=ft.Text("Tipo")),
+            ft.DataColumn(label=ft.Text("Peça/Quantidade")),
+            ft.DataColumn(label=ft.Text("Quantidade Total")),
+            ft.DataColumn(label=ft.Text("Unidade")),
+            ft.DataColumn(label=ft.Text("Preço")),
+            ft.DataColumn(label=ft.Text("Detalhes")),
+        ]
+    )
 
     # Layout principal
     page.add(
         ft.Text("Serviços por Kg"),
         ft.Row([servico_kg, quantidade_kg, quantidade_total_pecas, botao_adicionar_kg]),
-        ft.Text("Detalhar Peças no Serviço por Kg"),
-        ft.Row([tipo_peca_kg, quantidade_peca_kg, botao_adicionar_peca_kg]),
-        lista_detalhes_pecas,
+        expansion_panel,  # Adicionando o painel de expansão
         ft.Divider(),
         ft.Text("Serviços por Peça"),
         ft.Row([servico_peca, tipo_peca, quantidade_peca, preco_peca, botao_adicionar_peca]),
         ft.Divider(),
         ft.Text("Itens do Pedido:"),
-        lista_pedidos
+        tabela_pedidos
     )
 
 ft.app(target=main)
