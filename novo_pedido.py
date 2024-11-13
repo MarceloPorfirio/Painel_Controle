@@ -62,10 +62,17 @@ def main(page: ft.Page):
 
     def atualizar_detalhes_pecas():
         lista_detalhes_pecas.controls.clear()
-        for p in pecas_por_kg:
-            lista_detalhes_pecas.controls.append(
-                ft.Text(f"{p['peca']} - {p['quantidade']} peças")
-            )
+
+        # Organiza os itens em três colunas
+        col1, col2, col3 = ft.Column(), ft.Column(), ft.Column()
+        colunas = [col1, col2, col3]
+
+        # Divide os itens entre as três colunas
+        for i, p in enumerate(pecas_por_kg[:6]):  # Limite de 6 itens
+            colunas[i % 3].controls.append(ft.Text(f"{p['peca']} - {p['quantidade']} peças"))
+
+        # Adiciona as colunas à `lista_detalhes_pecas`
+        lista_detalhes_pecas.controls.extend([col1, col2, col3])
         page.update()
 
     def adicionar_por_kg(e):
@@ -133,15 +140,13 @@ def main(page: ft.Page):
     preco_peca = ft.TextField(label="Preço fixo por Peça", width=100, value="15.0")
     botao_adicionar_peca = ft.ElevatedButton("Adicionar por Peça", on_click=adicionar_por_peca)
 
-    # Container com duas colunas: ExpansionPanel à esquerda e lista de detalhes à direita
     detalhes_container = ft.Container(
     content=ft.Row([
-        # Coluna esquerda com o ExpansionPanel
         ft.Column(
             controls=[
                 ft.ExpansionPanelList(
                     expand_icon_color=ft.colors.AMBER,
-                    width=300,  # Largura para a coluna esquerda com o painel de expansão
+                    width=300,
                     elevation=8,
                     divider_color=ft.colors.AMBER,
                     controls=[
@@ -159,18 +164,15 @@ def main(page: ft.Page):
                 )
             ]
         ),
-        # Coluna direita com a lista de detalhes das peças
         ft.Column(
             controls=[
                 ft.Text("Lista de Detalhes das Peças:"),
-                lista_detalhes_pecas  # Exibe a lista de detalhes fora do painel de expansão
+                lista_detalhes_pecas
             ]
         )
     ])
 )
 
-
-    # Tabela para mostrar os serviços adicionados
     tabela_pedidos = ft.DataTable(
         columns=[
             ft.DataColumn(label=ft.Text("Tipo")),
@@ -182,11 +184,10 @@ def main(page: ft.Page):
         ]
     )
 
-    # Layout principal
     page.add(
         ft.Text("Serviços por Kg"),
         ft.Row([servico_kg, quantidade_kg, quantidade_total_pecas]),
-        detalhes_container,  # Adicionando o painel de expansão
+        detalhes_container,
         ft.Divider(color=ft.colors.TRANSPARENT),
         botao_adicionar_kg,
         ft.Divider(),
