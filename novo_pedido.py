@@ -14,6 +14,8 @@ def main(page: ft.Page):
         for item in servicos_adicionados:
             if "peca" in item:
                 tabela_pedidos.rows.append(
+                    
+
                     ft.DataRow(cells=[
                         ft.DataCell(ft.Text(item["tipo"])),
                         ft.DataCell(ft.Text(item["peca"])),
@@ -53,27 +55,48 @@ def main(page: ft.Page):
         page.update()
 
     def adicionar_peca_por_kg(e):
+        # Cria o dicionário da peça detalhada
         peca_detalhada = {
             "peca": tipo_peca_kg.value,
             "quantidade": quantidade_peca_kg.value,
         }
+        # Adiciona a peça à lista
         pecas_por_kg.append(peca_detalhada)
+
+        # Atualiza os detalhes das peças
         atualizar_detalhes_pecas()
 
+        # Zera os campos dos TextFields
+        tipo_peca_kg.value = ""
+        quantidade_peca_kg.value = ""
+
+        # Atualiza os TextFields na interface
+        tipo_peca_kg.update()
+        quantidade_peca_kg.update()
+
+
     def atualizar_detalhes_pecas():
+        # Limpa e recria as colunas no painel de expansão
         lista_detalhes_pecas.controls.clear()
 
-        # Organiza os itens em três colunas
-        col1, col2, col3 = ft.Column(), ft.Column(), ft.Column()
-        colunas = [col1, col2, col3]
+        # Cria colunas com containers para adicionar espaço lateral
+        col1 = ft.Container(content=ft.Column(), padding=ft.padding.only(left=10, right=10))
+        col2 = ft.Container(content=ft.Column(), padding=ft.padding.only(left=10, right=10))
+        col3 = ft.Container(content=ft.Column(), padding=ft.padding.only(left=10, right=10))
+        col4 = ft.Container(content=ft.Column(), padding=ft.padding.only(left=10, right=10))
+        colunas = [col1.content, col2.content, col3.content, col4.content]
 
-        # Divide os itens entre as três colunas
-        for i, p in enumerate(pecas_por_kg[:6]):  # Limite de 6 itens
-            colunas[i % 3].controls.append(ft.Text(f"{p['peca']} - {p['quantidade']} peças"))
+        # Divide os itens entre as colunas (6 itens por coluna)
+        for i, p in enumerate(pecas_por_kg):
+            colunas[i // 5 % 4].controls.append(
+                ft.Text(f"{p['peca']} - {p['quantidade']} peças")
+            )
 
-        # Adiciona as colunas à `lista_detalhes_pecas`
-        lista_detalhes_pecas.controls.extend([col1, col2, col3])
-        page.update()
+        # Adiciona as colunas ao painel
+        lista_detalhes_pecas.controls.append(
+            ft.Row(controls=[col1, col2, col3, col4], alignment="start")
+        )
+        lista_detalhes_pecas.update()
 
     def adicionar_por_kg(e):
         try:
@@ -85,20 +108,44 @@ def main(page: ft.Page):
             page.add(ft.Text("A quantidade de kg deve ser um número válido", color="red"))
             return
 
-        preco_por_kg = 12.00 if servico_kg.value == "Máquina" else 19.90 if servico_kg.value == "Completo" else 0.0
+        # Define o preço por kg com base no tipo de serviço
+        if servico_kg.value == "Máquina":
+            preco_por_kg = 12.00
+        elif servico_kg.value == "Completo":
+            preco_por_kg = 19.90
+        elif servico_kg.value == "Esfregar":
+            preco_por_kg = 17.90
+        elif servico_kg.value == "Secar":
+            preco_por_kg = 10.00
+        else:
+            preco_por_kg = 0.0
 
+        # Cria o dicionário do serviço
         servico = {
             "tipo": servico_kg.value,
             "quantidade_kg": quantidade_kg.value,
             "quantidade_total": quantidade_total_pecas.value,
             "detalhes_pecas": pecas_por_kg.copy(),
             "unidade": "Kg",
-            "preco": quantidade_kg_valor * preco_por_kg
+            "preco": round(quantidade_kg_valor * preco_por_kg, 2),
         }
+
+        # Adiciona o serviço à lista e atualiza a interface
         servicos_adicionados.append(servico)
         pecas_por_kg.clear()
         atualizar_detalhes_pecas()
         atualizar_lista()
+
+        # Zera os campos dos TextFields
+        servico_kg.value = ""
+        quantidade_kg.value = ""
+        quantidade_total_pecas.value = ""
+
+        # Atualiza os TextFields na interface
+        servico_kg.update()
+        quantidade_kg.update()
+        quantidade_total_pecas.update()
+
 
     def adicionar_por_peca(e):
         servico = {
@@ -114,30 +161,30 @@ def main(page: ft.Page):
     # Elementos de entrada para o serviço por kg
     servico_kg = ft.Dropdown(
         label="Serviço",
-        options=[ft.dropdown.Option("Completo"),ft.dropdown.Option("Esfregar"), ft.dropdown.Option("Máquina"), ft.dropdown.Option("Secagem")],
+        options=[ft.dropdown.Option("Completo"), ft.dropdown.Option("Esfregar"), ft.dropdown.Option("Máquina"), ft.dropdown.Option("Secar")],
     )
     quantidade_kg = ft.TextField(label="Peso (kg)", width=150)
-    quantidade_total_pecas = ft.TextField(label="Total de Peças", width=150)
+    quantidade_total_pecas = ft.TextField(label="Quantidade", width=150)
     botao_adicionar_kg = ft.ElevatedButton("Adicionar Serviço por Kg", on_click=adicionar_por_kg)
 
     tipo_peca_kg = ft.Dropdown(
         label="Tipo de Peça",
         options=[ft.dropdown.Option("Bermuda"), ft.dropdown.Option("Camiseta"), ft.dropdown.Option("Cueca"), ft.dropdown.Option("Meia")]
     )
-    quantidade_peca_kg = ft.TextField(label="Quantidade", width=100)
+    quantidade_peca_kg = ft.TextField(label="Quantidade")
     botao_adicionar_peca_kg = ft.ElevatedButton("Adicionar Peça", on_click=adicionar_peca_por_kg)
     lista_detalhes_pecas = ft.Column(scroll="adaptive")
 
     servico_peca = ft.Dropdown(
         label="Serviço por Peça",
-        options=[ft.dropdown.Option("Lavagem"), ft.dropdown.Option("Passagem"),ft.dropdown.Option("Secagem")],
+        options=[ft.dropdown.Option("Lavagem"), ft.dropdown.Option("Passagem"), ft.dropdown.Option("Secagem")],
     )
     tipo_peca = ft.Dropdown(
         label="Tipo de Peça",
         options=[ft.dropdown.Option("Casaco"), ft.dropdown.Option("Jaqueta"), ft.dropdown.Option("Edredom"), ft.dropdown.Option("Cobertor")]
     )
     quantidade_peca = ft.TextField(label="Quantidade (Peça)", width=100)
-    preco_peca = ft.TextField(label="Preço fixo por Peça", width=100, value="15.0")
+    preco_peca = ft.TextField(label="Preço fixo por Peça", width=100)
     botao_adicionar_peca = ft.ElevatedButton("Adicionar por Peça", on_click=adicionar_por_peca)
 
     detalhes_container = ft.Container(
@@ -146,32 +193,40 @@ def main(page: ft.Page):
             controls=[
                 ft.ExpansionPanelList(
                     expand_icon_color=ft.colors.AMBER,
-                    width=300,
+                    width=1000,
                     elevation=8,
                     divider_color=ft.colors.AMBER,
                     controls=[
                         ft.ExpansionPanel(
                             header=ft.ListTile(title=ft.Text("Detalhar Peças por Kg")),
                             content=ft.Container(
-                                content=ft.Column([
-                                    tipo_peca_kg,
-                                    quantidade_peca_kg,
-                                    botao_adicionar_peca_kg,
-                                ])
+                                padding=10,  # Adiciona padding ao conteúdo
+                                content=ft.Row(
+                                    controls=[
+                                            ft.Column(
+                                                controls=[
+                                                    tipo_peca_kg,
+                                                    quantidade_peca_kg,
+                                                    botao_adicionar_peca_kg,
+                                                ]
+                                            ),
+                                            ft.Column(
+                                                controls=[
+                                                    lista_detalhes_pecas
+                                                ]
+                                            )
+                                    
+                                ],spacing=30)
                             )
                         )
                     ]
                 )
             ]
         ),
-        ft.Column(
-            controls=[
-                ft.Text("Lista de Detalhes das Peças:"),
-                lista_detalhes_pecas
-            ]
-        )
+        
     ])
 )
+
 
     tabela_pedidos = ft.DataTable(
         columns=[

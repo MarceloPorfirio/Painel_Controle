@@ -1,290 +1,228 @@
 import flet as ft
-import time
+
+
+class SistemaLavanderia(ft.UserControl):
+    def __init__(self):
+        super().__init__()
+        self.servicos_adicionados = []
+        self.pecas_por_kg = []
+
+    def atualizar_lista(self):
+        self.tabela_pedidos.rows.clear()
+        for item in self.servicos_adicionados:
+            if "peca" in item:
+                self.tabela_pedidos.rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(ft.Text(item["tipo"])),
+                            ft.DataCell(ft.Text(item["peca"])),
+                            ft.DataCell(ft.Text(item["quantidade"])),
+                            ft.DataCell(ft.Text(item["unidade"])),
+                            ft.DataCell(ft.Text(f"R$ {item['preco']}")),
+                            ft.DataCell(ft.Text("-")),
+                        ]
+                    )
+                )
+            else:
+                detalhes_button = ft.IconButton(
+                    icon=ft.icons.VISIBILITY,
+                    tooltip="Ver detalhes das peças",
+                    on_click=lambda e, item=item: self.mostrar_detalhes_pecas(item["detalhes_pecas"])
+                    if "detalhes_pecas" in item
+                    else None,
+                )
+                self.tabela_pedidos.rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(ft.Text(item["tipo"])),
+                            ft.DataCell(ft.Text(f"{item['quantidade_kg']} Kg")),
+                            ft.DataCell(ft.Text(item["quantidade_total"])),
+                            ft.DataCell(ft.Text(item["unidade"])),
+                            ft.DataCell(ft.Text(f"R$ {item['preco']}")),
+                            ft.DataCell(detalhes_button),
+                        ]
+                    )
+                )
+        self.update()
+
+    def mostrar_detalhes_pecas(self, detalhes_pecas):
+        detalhes_texto = "\n".join(
+            [f"{p['peca']} - {p['quantidade']} peças" for p in detalhes_pecas]
+        )
+        dialog = ft.AlertDialog(
+            title=ft.Text("Detalhes das Peças por Kg"),
+            content=ft.Text(detalhes_texto),
+            actions=[ft.TextButton("Fechar", on_click=lambda e: self.page.dialog.close())],
+        )
+        self.page.dialog = dialog
+        dialog.open = True
+        self.update()
+
+    def adicionar_peca_por_kg(self, e):
+        peca_detalhada = {
+            "peca": self.tipo_peca_kg.value,
+            "quantidade": self.quantidade_peca_kg.value,
+        }
+        self.pecas_por_kg.append(peca_detalhada)
+        self.atualizar_detalhes_pecas()
+
+    def atualizar_detalhes_pecas(self):
+        self.lista_detalhes_pecas.controls.clear()
+
+        col1, col2, col3, col4 = ft.Column(), ft.Column(), ft.Column(), ft.Column()
+        colunas = [col1, col2, col3, col4]
+
+        for i, p in enumerate(self.pecas_por_kg):
+            colunas[i // 6 % 4].controls.append(
+                ft.Text(f"{p['peca']} - {p['quantidade']} peças")
+            )
+
+        self.lista_detalhes_pecas.controls.append(
+            ft.Row(
+                controls=[col1, col2, col3, col4],
+                alignment="start",
+            )
+        )
+        self.update()
+
+    def adicionar_por_kg(self, e):
+        try:
+            quantidade_kg_valor = float(self.quantidade_kg.value)
+            if quantidade_kg_valor <= 0:
+                self.page.add(ft.Text("A quantidade de kg deve ser maior que 0", color="red"))
+                return
+        except ValueError:
+            self.page.add(ft.Text("A quantidade de kg deve ser um número válido", color="red"))
+            return
+
+        preco_por_kg = 12.00 if self.servico_kg.value == "Máquina" else 19.90 if self.servico_kg.value == "Completo" else 0.0
+
+        servico = {
+            "tipo": self.servico_kg.value,
+            "quantidade_kg": self.quantidade_kg.value,
+            "quantidade_total": self.quantidade_total_pecas.value,
+            "detalhes_pecas": self.pecas_por_kg.copy(),
+            "unidade": "Kg",
+            "preco": quantidade_kg_valor * preco_por_kg,
+        }
+        self.servicos_adicionados.append(servico)
+        self.pecas_por_kg.clear()
+        self.atualizar_detalhes_pecas()
+        self.atualizar_lista()
+
+    def adicionar_por_peca(self, e):
+        servico = {
+            "tipo": self.servico_peca.value,
+            "peca": self.tipo_peca.value,
+            "quantidade": self.quantidade_peca.value,
+            "unidade": "Peça(s)",
+            "preco": float(self.preco_peca.value),
+        }
+        self.servicos_adicionados.append(servico)
+        self.atualizar_lista()
+
+    def build(self):
+        self.servico_kg = ft.Dropdown(
+            label="Serviço",
+            options=[
+                ft.dropdown.Option("Completo"),
+                ft.dropdown.Option("Esfregar"),
+                ft.dropdown.Option("Máquina"),
+                ft.dropdown.Option("Secagem"),
+            ],
+        )
+        self.quantidade_kg = ft.TextField(label="Peso (kg)", width=150)
+        self.quantidade_total_pecas = ft.TextField(label="Total de Peças", width=150)
+        self.botao_adicionar_kg = ft.ElevatedButton(
+            "Adicionar Serviço por Kg", on_click=self.adicionar_por_kg
+        )
+
+        self.tipo_peca_kg = ft.Dropdown(
+            label="Tipo de Peça",
+            options=[
+                ft.dropdown.Option("Bermuda"),
+                ft.dropdown.Option("Camiseta"),
+                ft.dropdown.Option("Cueca"),
+                ft.dropdown.Option("Meia"),
+            ],
+        )
+        self.quantidade_peca_kg = ft.TextField(label="Quantidade", width=100)
+        self.botao_adicionar_peca_kg = ft.ElevatedButton(
+            "Adicionar Peça", on_click=self.adicionar_peca_por_kg
+        )
+        self.lista_detalhes_pecas = ft.Column(scroll="adaptive")
+
+        self.servico_peca = ft.Dropdown(
+            label="Serviço por Peça",
+            options=[
+                ft.dropdown.Option("Lavagem"),
+                ft.dropdown.Option("Passagem"),
+                ft.dropdown.Option("Secagem"),
+            ],
+        )
+        self.tipo_peca = ft.Dropdown(
+            label="Tipo de Peça",
+            options=[
+                ft.dropdown.Option("Casaco"),
+                ft.dropdown.Option("Jaqueta"),
+                ft.dropdown.Option("Edredom"),
+                ft.dropdown.Option("Cobertor"),
+            ],
+        )
+        self.quantidade_peca = ft.TextField(label="Quantidade (Peça)", width=100)
+        self.preco_peca = ft.TextField(label="Preço fixo por Peça", width=100)
+        self.botao_adicionar_peca = ft.ElevatedButton(
+            "Adicionar por Peça", on_click=self.adicionar_por_peca
+        )
+
+        detalhes_panel = ft.ExpansionPanelList(
+            controls=[
+                ft.ExpansionPanel(
+                    header=ft.ListTile(title=ft.Text("Detalhes das Peças por Kg")),
+                    content=self.lista_detalhes_pecas,
+                )
+            ]
+        )
+
+        self.tabela_pedidos = ft.DataTable(
+            columns=[
+                ft.DataColumn(label=ft.Text("Tipo")),
+                ft.DataColumn(label=ft.Text("Peça/Quantidade")),
+                ft.DataColumn(label=ft.Text("Quantidade Total")),
+                ft.DataColumn(label=ft.Text("Unidade")),
+                ft.DataColumn(label=ft.Text("Preço")),
+                ft.DataColumn(label=ft.Text("Detalhes")),
+            ]
+        )
+
+        return ft.Column(
+            controls=[
+                ft.Text("Serviços por Kg"),
+                ft.Row([self.servico_kg, self.quantidade_kg, self.quantidade_total_pecas]),
+                detalhes_panel,
+                ft.Divider(),
+                self.botao_adicionar_kg,
+                ft.Divider(),
+                ft.Text("Serviços por Peça"),
+                ft.Row(
+                    [
+                        self.servico_peca,
+                        self.tipo_peca,
+                        self.quantidade_peca,
+                        self.preco_peca,
+                        self.botao_adicionar_peca,
+                    ]
+                ),
+                ft.Divider(),
+                ft.Text("Itens do Pedido:"),
+                self.tabela_pedidos,
+            ]
+        )
 
 
 def main(page: ft.Page):
-    page.bgcolor = ft.colors.WHITE
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.bgcolor = ft.colors.BLUE_700
-    
-    # Loader
-    loader = ft.ProgressRing(visible=False)
-    page.add(loader)
+    page.title = "Sistema de Lavanderia - Pedido"
+    page.add(SistemaLavanderia())
 
 
-    # Função para abrir o AlertDialog de adicionar Pokémon
-    def open_add_dialog(e):
-        text_field_name = ft.TextField(label="Pokémon Name", autofocus=True)
-        text_field_url = ft.TextField(label="url")
-
-    
-
-        actions = ft.Row(
-            controls=[
-                ft.TextButton("Cancel", on_click=close_dialog),
-                ft.TextButton("Add",on_click=lambda e: add_pokemon(text_field_name.value, text_field_url.value, dialog)),
-                
-            ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-        )
-        
-       
-        dialog = ft.AlertDialog(
-            title=ft.Text("Add Pokémon"),
-            content=ft.Column(
-                width=300,
-                height=200,
-                controls=[text_field_name,text_field_url,actions]
-            ),
-            
-        )
-         # Centralizando o loader
-        loader_container = ft.Container(
-            content=loader,
-            alignment=ft.alignment.center,  # Alinhamento centralizado
-            padding=10,  # Espaçamento interno
-        )
-        # Atualiza o conteúdo do diálogo com o loader centralizado
-        dialog.content.controls.insert(2, loader_container)  # Insere o loader no índice 2
-        page.dialog = dialog
-        dialog.open = True
-        page.update()
-
-
-    page.appbar = ft.AppBar(
-        
-        # leading=ft.Icon(ft.icons.PALETTE),
-        leading_width=20,
-        title=ft.Text('My Collection',size=28,weight=ft.FontWeight.BOLD,color='white'),
-        center_title=True,
-        bgcolor=ft.colors.BLUE_700,
-        actions=[
-        ft.Container(
-            content=ft.IconButton(
-                icon=ft.icons.ADD,
-                icon_size=30,
-                icon_color=ft.colors.BLUE_500,
-                bgcolor=ft.colors.WHITE,
-                tooltip='add card',
-                on_click=open_add_dialog
-            ),
-            padding=ft.padding.only(right=10,top=6)  # Define o padding desejado
-        ),
-    ]
-)
-    
-    # Lista de imagens das cartas, nomeadas pelo nome dos Pokémon
-    images = {
-        'squirtle': 'card_1.png',
-        'pikachu': 'card_2.png',
-        'bulbasaur': 'card_3.png',
-        'charmander': 'card_4.png',
-        'psyduck': 'card_5.png',
-        'pidgey': 'card_6.png',
-        'vulpix': 'card_7.png',
-    }
-
-    
-    # Função para realizar animações nas cartas
-    def change_cards():
-        for card in cards.controls:
-            card.content.offset.x += card.data * 0.2
-            card.content.scale.scale -= card.data * 0.1
-            card.content.opacity -= card.data * 0.3
-        cards.update()
-
-    # Função para fechar o diálogo
-    def close_dialog(e):
-        page.dialog.open = False
-        page.update()
-
-    # Função para exibir alerta de sucesso
-    def show_success_alert():
-        success_dialog = ft.AlertDialog(
-            title=ft.Text("Sucess!"),
-            content=ft.Text("Pokémon added to the collection."),
-            actions=[ft.TextButton("Ok", on_click=close_dialog)],
-        )
-        page.dialog = success_dialog
-        success_dialog.open = True
-        page.update()
-
-    
-     # Função para adicionar novo Pokémon ao dicionário e atualizar a exibição
-    def add_pokemon(name, url, dialog):
-        # Ativar loader
-        loader.visible = True
-        page.update()
-        time.sleep(2)
-        # Adiciona ao dicionário `images`
-        images[name.lower()] = url
-        
-        # Atualiza as cartas para incluir a nova
-        cards.controls.append(
-            ft.Dismissible(
-                content=ft.Container(
-                    image_src=url,
-                    border_radius=ft.border_radius.all(10),
-                    aspect_ratio=9/16,
-                    offset=ft.Offset(x=0, y=0),
-                    scale=ft.Scale(scale=1),
-                    opacity=1,
-                    shadow=ft.BoxShadow(blur_radius=30, color=ft.colors.BLUE_200),
-                    animate=ft.Animation(duration=300, curve=ft.AnimationCurve.DECELERATE),
-                    animate_offset=True,
-                    animate_scale=True,
-                    animate_opacity=True
-                ),
-                data=len(cards.controls),
-                on_dismiss=handle_dismiss
-            )
-        )
-        
-        # Desativar loader e exibir alerta de sucesso
-        loader.visible = False
-        close_dialog(None)
-        show_success_alert()
-        cards.update()
-        page.update()
-
-    # Função para exibir a carta do Pokémon pesquisado
-    def search_pokemon(name, dialog):
-        name = name.lower()
-        if name in images:
-            selected_card = ft.Container(
-                image_src=images[name],
-                border_radius=ft.border_radius.all(10),
-                aspect_ratio=9/16,
-                offset=ft.Offset(x=0, y=0),
-                scale=ft.Scale(scale=1),
-                opacity=1,
-                shadow=ft.BoxShadow(blur_radius=30, color=ft.colors.BLUE_200),
-                animate_offset=True,
-                animate_scale=True,
-                animate_opacity=True,
-                animate=ft.Animation(duration=300, curve=ft.AnimationCurve.DECELERATE)
-            )
-            dialog.content = ft.Column(
-                width=200,
-                height=450,
-                controls=[
-                    selected_card,
-                    ft.Row(controls=[
-                        ft.TextButton("Close", on_click=close_dialog)
-                    ], alignment=ft.MainAxisAlignment.END)
-                ]
-            )
-        else:
-            dialog.content = ft.Column(
-                width=200,
-                height=100,
-                controls=[
-                    ft.Text(f"{name.capitalize()} Not Found.", color=ft.colors.RED,size=20,weight=ft.FontWeight.BOLD),
-                    ft.Row(controls=[
-                        ft.TextButton("Close", on_click=close_dialog)
-                    ], alignment=ft.MainAxisAlignment.END)
-                ]
-            )
-        page.update()
-
-    # Função para abrir o AlertDialog de busca
-    def open_search_dialog(e):
-        text_field = ft.TextField(label="Pokémon Name", autofocus=True)
-        search_button = ft.TextButton("Search", on_click=lambda e: search_pokemon(text_field.value, dialog))
-        
-        dialog = ft.AlertDialog(
-            title=ft.Text("Search for Pokemon"),
-            content=ft.Column(
-                width=200,
-                height=100,
-                controls=[text_field, search_button]),
-            actions=[],
-        )
-        page.dialog = dialog
-        dialog.open = True
-        page.update()
-
-    # Função para gerenciar o dismiss
-    def handle_dismiss(e):
-        for num, card in enumerate(cards.controls):
-            if e.control == cards.controls[0]:
-                cards.controls.clear()
-                cards.controls.extend([
-                    ft.Dismissible(
-                        content=ft.Container(
-                            image_src=img,
-                            border_radius=ft.border_radius.all(10),
-                            aspect_ratio=9/16,
-                            offset=ft.Offset(x=0, y=0),
-                            scale=ft.Scale(scale=1),
-                            opacity=1,
-                            shadow=ft.BoxShadow(blur_radius=30, color=ft.colors.BLUE_200),
-                            animate=ft.Animation(duration=300, curve=ft.AnimationCurve.DECELERATE),
-                            animate_offset=True,
-                            animate_scale=True,
-                            animate_opacity=True
-                        ),
-                        data=pos,
-                        on_dismiss=handle_dismiss
-                    ) for pos, img in reversed(list(enumerate(images.values())))
-                ])
-            card.data -= 1
-            card.content.offset.x = 0
-            card.content.opacity = 1
-            card.content.scale.scale = 1
-        change_cards()
-
-    # Stack com as cartas animadas
-    cards = ft.Stack(
-        height=400,
-        controls=[
-            ft.Dismissible(
-                content=ft.Container(
-                    image_src=img,
-                    border_radius=ft.border_radius.all(10),
-                    aspect_ratio=9/16,
-                    offset=ft.Offset(x=0, y=0),
-                    scale=ft.Scale(scale=1),
-                    opacity=1,
-                    shadow=ft.BoxShadow(blur_radius=30, color=ft.colors.BLUE_200),
-                    animate=ft.Animation(duration=300, curve=ft.AnimationCurve.DECELERATE),
-                    animate_offset=True,
-                    animate_scale=True,
-                    animate_opacity=True
-                ),
-                data=pos,
-                on_dismiss=handle_dismiss
-            ) for pos, img in reversed(list(enumerate(images.values())))
-        ]
-    )
-
-    # Configurando o título e o layout
-    title = ft.Container(
-        margin=ft.margin.only(bottom=40),
-        content=ft.Image(
-            src='logo_poke.png',
-            width=280
-        )
-    )
-    layout = ft.Row(controls=[cards], alignment=ft.MainAxisAlignment.CENTER)
-
-    # Adicionando o FloatingActionButton
-    search_button = ft.FloatingActionButton(
-        icon=ft.icons.SEARCH,
-        tooltip="Search for Card",
-        on_click=open_search_dialog
-    )
-
-    page.add(title, layout)
-    page.floating_action_button = search_button
-  
-    # Aplicando animações iniciais às cartas
-    for card in cards.controls:
-        card.content.offset.x += card.data * 0.2
-        card.content.scale.scale -= card.data * 0.1
-        card.content.opacity -= card.data * 0.3
-
-    page.update()
-
-if __name__ == '__main__':
-    ft.app(target=main, assets_dir='assets')
+ft.app(target=main)
