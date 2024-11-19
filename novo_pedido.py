@@ -192,42 +192,59 @@ def main(page: ft.Page):
     content=ft.Row([
         ft.Column(
             controls=[
-                ft.ExpansionPanelList(
-                    expand_icon_color=ft.colors.AMBER,
-                    width=1000,
-                    elevation=8,
-                    divider_color=ft.colors.AMBER,
-                    controls=[
-                        ft.ExpansionPanel(
-                            header=ft.ListTile(title=ft.Text("Detalhar Peças por Kg")),
-                            content=ft.Container(
-                                padding=10,  # Adiciona padding ao conteúdo
-                                content=ft.Row(
-                                    controls=[
-                                            ft.Column(
-                                                controls=[
-                                                    tipo_peca_kg,
-                                                    quantidade_peca_kg,
-                                                    botao_adicionar_peca_kg,
-                                                ]
-                                            ),
-                                            ft.Column(
-                                                controls=[
-                                                    lista_detalhes_pecas
-                                                ]
-                                            )
-                                    
-                                ],spacing=30)
-                            )
-                        )
-                    ]
+                ft.ElevatedButton(
+                    "Detalhar Peças por Kg",
+                    icon=ft.icons.ADD,
+                    on_click=lambda e: abrir_alert_dialog()
                 )
             ]
         ),
-        
     ])
 )
 
+    # Função para abrir o AlertDialog com o conteúdo do antigo ExpansionPanel
+    def abrir_alert_dialog():
+        dialog = ft.AlertDialog(
+            title=ft.Text("Detalhar Peças por Kg"),
+            content=ft.Container(
+                padding=10,  # Adiciona padding ao conteúdo
+                content=ft.Column(
+                    controls=[
+                        ft.Column(
+                            controls=[
+                                tipo_peca_kg,
+                                quantidade_peca_kg,
+                                botao_adicionar_peca_kg,
+                            ]
+                        ),
+                        ft.Column(
+                            controls=[
+                                lista_detalhes_pecas
+                            ]
+                        )
+                        
+                    ],
+                    spacing=30
+                ),
+                
+            ),
+            
+            actions=[
+                ft.Row(controls=[
+                    ft.TextButton("Fechar"),
+                    ft.TextButton("Salvar",on_click=salvar_pecas),
+                ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+                
+            ]
+        )
+        page.dialog = dialog
+        dialog.open = True
+        page.update()
+    
+    def salvar_pecas(e):
+        page.dialog.open = False
+        page.update()
+        
 
     tabela_pedidos = ft.DataTable(
         columns=[
