@@ -161,10 +161,11 @@ def main(page: ft.Page):
     # Elementos de entrada para o serviço por kg
     servico_kg = ft.Dropdown(
         label="Serviço",
+        width=310,
         options=[ft.dropdown.Option("Completo"), ft.dropdown.Option("Esfregar"), ft.dropdown.Option("Máquina"), ft.dropdown.Option("Secar")],
     )
     quantidade_kg = ft.TextField(label="Peso (kg)", width=150)
-    quantidade_total_pecas = ft.TextField(label="Quantidade", width=150)
+    quantidade_total_pecas = ft.TextField(label="Total Peças", width=150)
     botao_adicionar_kg = ft.ElevatedButton("Adicionar Serviço por Kg", on_click=adicionar_por_kg)
 
     tipo_peca_kg = ft.Dropdown(
@@ -241,7 +242,10 @@ def main(page: ft.Page):
 
     page.add(
         ft.Text("Serviços por Kg"),
-        ft.Row([servico_kg, quantidade_kg, quantidade_total_pecas]),
+        ft.Column(controls=[
+            ft.Row([
+                servico_kg]),
+            ft.Row([quantidade_kg, quantidade_total_pecas])]),
         detalhes_container,
         ft.Divider(color=ft.colors.TRANSPARENT),
         botao_adicionar_kg,
