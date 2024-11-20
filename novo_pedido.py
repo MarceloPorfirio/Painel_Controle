@@ -99,13 +99,36 @@ def main(page: ft.Page):
         lista_detalhes_pecas.update()
 
     def adicionar_por_kg(e):
+        # Verifica se os campos obrigatórios estão preenchidos
+        if not servico_kg.value or not quantidade_kg.value:
+            # Exibe o AlertDialog se algum campo estiver vazio
+            page.dialog = ft.AlertDialog(
+                title=ft.Text("Campos obrigatórios"),
+                content=ft.Text("Por favor, preencha todos os campos antes de continuar."),
+                actions=[
+                    ft.TextButton("Fechar", on_click=lambda e: page.dialog.close())
+                ]
+            )
+            page.dialog.open = True
+            page.update()
+            return  # Sai da função sem continuar
+
         try:
+            # Converte a quantidade de kg para número e valida
             quantidade_kg_valor = float(quantidade_kg.value)
             if quantidade_kg_valor <= 0:
-                page.add(ft.Text("A quantidade de kg deve ser maior que 0", color="red"))
-                return
+                raise ValueError("Quantidade de kg deve ser maior que 0.")
         except ValueError:
-            page.add(ft.Text("A quantidade de kg deve ser um número válido", color="red"))
+            # Exibe o AlertDialog se a quantidade de kg não for válida
+            page.dialog = ft.AlertDialog(
+                title=ft.Text("Erro"),
+                content=ft.Text("A quantidade de kg deve ser um número válido e maior que 0."),
+                actions=[
+                    ft.TextButton("Fechar", on_click=lambda e: page.dialog.close())
+                ]
+            )
+            page.dialog.open = True
+            page.update()
             return
 
         # Define o preço por kg com base no tipo de serviço
@@ -145,6 +168,7 @@ def main(page: ft.Page):
         servico_kg.update()
         quantidade_kg.update()
         quantidade_total_pecas.update()
+
 
 
     def adicionar_por_peca(e):
@@ -243,6 +267,14 @@ def main(page: ft.Page):
     
     def salvar_pecas(e):
         page.dialog.open = False
+        page.update()
+
+        # Cria uma SnackBar para exibir a mensagem
+        page.snack_bar = ft.SnackBar(
+            content=ft.Text("Peças adicionadas com sucesso!"),
+            duration=2000  # Duração da mensagem em milissegundos
+        )
+        page.snack_bar.open = True  # Abre a SnackBar
         page.update()
         
 
