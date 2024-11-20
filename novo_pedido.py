@@ -8,7 +8,7 @@ def main(page: ft.Page):
     servicos_adicionados = []
     # Lista temporária para detalhar peças por Kg
     pecas_por_kg = []
-
+    
     def atualizar_lista():
         tabela_pedidos.rows.clear()
         for item in servicos_adicionados:
@@ -289,6 +289,8 @@ def main(page: ft.Page):
         ]
     )
 
+    
+    
     page.add(
         ft.Text("Serviços por Kg"),
         ft.Column(controls=[
