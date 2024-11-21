@@ -185,12 +185,12 @@ def main(page: ft.Page):
     # Elementos de entrada para o serviço por kg
     servico_kg = ft.Dropdown(
         label="Serviço",
-        width=310,
+        width=500,
         options=[ft.dropdown.Option("Completo"), ft.dropdown.Option("Esfregar"), ft.dropdown.Option("Máquina"), ft.dropdown.Option("Secar")],
     )
-    quantidade_kg = ft.TextField(label="Peso (kg)", width=150)
-    quantidade_total_pecas = ft.TextField(label="Total Peças", width=150)
-    botao_adicionar_kg = ft.ElevatedButton("Adicionar Serviço por Kg", on_click=adicionar_por_kg)
+    quantidade_kg = ft.TextField(label="Peso (kg)", width=500)
+    quantidade_total_pecas = ft.TextField(label="Total Peças", width=500)
+    botao_adicionar_kg = ft.ElevatedButton("Salvar", on_click=adicionar_por_kg,width=200)
 
     tipo_peca_kg = ft.Dropdown(
         label="Tipo de Peça",
@@ -202,29 +202,19 @@ def main(page: ft.Page):
 
     servico_peca = ft.Dropdown(
         label="Serviço por Peça",
+        width=500,
         options=[ft.dropdown.Option("Lavagem"), ft.dropdown.Option("Passagem"), ft.dropdown.Option("Secagem")],
     )
     tipo_peca = ft.Dropdown(
         label="Tipo de Peça",
+        width=500,
         options=[ft.dropdown.Option("Casaco"), ft.dropdown.Option("Jaqueta"), ft.dropdown.Option("Edredom"), ft.dropdown.Option("Cobertor")]
     )
-    quantidade_peca = ft.TextField(label="Quantidade (Peça)", width=100)
-    preco_peca = ft.TextField(label="Preço fixo por Peça", width=100)
-    botao_adicionar_peca = ft.ElevatedButton("Adicionar por Peça", on_click=adicionar_por_peca)
+    quantidade_peca = ft.TextField(label="Quantidade (Peça)",width=246)
+    preco_peca = ft.TextField(label="Preço fixo por Peça",width=246)
+    botao_adicionar_peca = ft.ElevatedButton("Adicionar por Peça", on_click=adicionar_por_peca,width=300)
 
-    detalhes_container = ft.Container(
-    content=ft.Row([
-        ft.Column(
-            controls=[
-                ft.ElevatedButton(
-                    "Detalhar Peças por Kg",
-                    icon=ft.icons.ADD,
-                    on_click=lambda e: abrir_alert_dialog()
-                )
-            ]
-        ),
-    ])
-)
+    
 
     # Função para abrir o AlertDialog com o conteúdo do antigo ExpansionPanel
     def abrir_alert_dialog():
@@ -289,20 +279,68 @@ def main(page: ft.Page):
         ]
     )
 
+    container_kg = ft.Container(
+        width=600,
+        height=370,
+        padding=20,
+        border_radius=ft.border_radius.all(15),
+        bgcolor=ft.colors.BLUE_200,
+        content=ft.Column(
+            controls=[
+                ft.Row([ft.Text('Serviços por kg',color='white',size=25)],alignment='center'),
+                ft.Divider(color='transparent'),
+                ft.Row([servico_kg],alignment='center'),
+                ft.Row([quantidade_kg],alignment='center'),
+                ft.Row([quantidade_total_pecas],alignment='center'),
+                ft.Divider(color='transparent'),
+                ft.Row(
+                    controls=[
+                        ft.ElevatedButton(
+                        "Detalhar",
+                        icon=ft.icons.ADD,
+                        width=200,
+                        on_click=lambda e: abrir_alert_dialog()
+                ), 
+                        botao_adicionar_kg,
+                    ],alignment=ft.MainAxisAlignment.SPACE_AROUND
+                )
+
+            ]
+        )
+    )
     
+    container_pc = ft.Container(
+        width=600,
+        height=370,
+        padding=20,
+        border_radius=ft.border_radius.all(15),
+        bgcolor=ft.colors.GREEN_200,
+        content=ft.Column(
+            controls=[
+                ft.Row([ft.Text('Serviços por peça',color='white',size=25)],alignment='center'),
+                ft.Divider(color='transparent'),
+                ft.Row([servico_peca],alignment='center'),
+                ft.Row([tipo_peca],alignment='center'),
+                ft.Row([quantidade_peca,preco_peca],alignment='center'),
+                ft.Divider(color='transparent'),
+                ft.Row([botao_adicionar_peca],alignment='center'),
+
+            ],spacing=12
+        )
+
+    )
     
     page.add(
-        ft.Text("Serviços por Kg"),
-        ft.Column(controls=[
-            ft.Row([
-                servico_kg]),
-            ft.Row([quantidade_kg, quantidade_total_pecas])]),
-        detalhes_container,
-        ft.Divider(color=ft.colors.TRANSPARENT),
-        botao_adicionar_kg,
-        ft.Divider(),
-        ft.Text("Serviços por Peça"),
-        ft.Row([servico_peca, tipo_peca, quantidade_peca, preco_peca, botao_adicionar_peca]),
+        ft.Row(
+            controls=[
+                container_kg,container_pc
+            ],alignment=ft.MainAxisAlignment.CENTER
+        ),
+        
+        
+        
+        # ft.Text("Serviços por Peça"),
+        # ft.Row([servico_peca, tipo_peca, quantidade_peca, preco_peca, botao_adicionar_peca]),
         ft.Divider(),
         ft.Text("Itens do Pedido:"),
         tabela_pedidos
