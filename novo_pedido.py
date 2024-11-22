@@ -184,37 +184,46 @@ def main(page: ft.Page):
 
     # Elementos de entrada para o serviço por kg
     servico_kg = ft.Dropdown(
-        label="Serviço",
+        filled=True,
+        border_color='transparent',
+        bgcolor='white',
+        hint_text="Serviço",
         width=500,
         options=[ft.dropdown.Option("Completo"), ft.dropdown.Option("Esfregar"), ft.dropdown.Option("Máquina"), ft.dropdown.Option("Secar")],
     )
-    quantidade_kg = ft.TextField(label="Peso (kg)", width=500)
-    quantidade_total_pecas = ft.TextField(label="Total Peças", width=500)
+    quantidade_kg = ft.TextField(hint_text="Peso (kg)", width=500,filled=True,border_color='transparent', bgcolor='white')
+    quantidade_total_pecas = ft.TextField(hint_text="Total Peças", width=500,filled=True,border_color='transparent', bgcolor='white')
     botao_adicionar_kg = ft.ElevatedButton("Salvar", on_click=adicionar_por_kg,width=200)
 
     tipo_peca_kg = ft.Dropdown(
         filled=True,
         border_color='transparent',
-        bgcolor='transparent',
-        label="Tipo de Peça",
+        bgcolor='white',
+        hint_text='Tipo de peça',
         options=[ft.dropdown.Option("Bermuda"), ft.dropdown.Option("Camiseta"), ft.dropdown.Option("Cueca"), ft.dropdown.Option("Meia")]
     )
-    quantidade_peca_kg = ft.TextField(label="Quantidade")
+    quantidade_peca_kg = ft.TextField(hint_text="Quantidade",filled=True,border_color='transparent', bgcolor='white')
     botao_adicionar_peca_kg = ft.ElevatedButton("Adicionar Peça", on_click=adicionar_peca_por_kg)
     lista_detalhes_pecas = ft.Column(scroll="adaptive")
 
     servico_peca = ft.Dropdown(
-        label="Serviço por Peça",
+        border_color='transparent',
+        bgcolor='white',
+        filled=True,
+        hint_text='Serviço por Peça',
         width=500,
         options=[ft.dropdown.Option("Lavagem"), ft.dropdown.Option("Passagem"), ft.dropdown.Option("Secagem")],
     )
     tipo_peca = ft.Dropdown(
-        label="Tipo de Peça",
+        hint_text="Tipo de Peça",
+        filled=True,
+        bgcolor='white',
+        border_color='transparent',
         width=500,
         options=[ft.dropdown.Option("Casaco"), ft.dropdown.Option("Jaqueta"), ft.dropdown.Option("Edredom"), ft.dropdown.Option("Cobertor")]
     )
-    quantidade_peca = ft.TextField(label="Quantidade (Peça)",width=246)
-    preco_peca = ft.TextField(label="Preço fixo por Peça",width=246)
+    quantidade_peca = ft.TextField(hint_text="Quantidade (Peça)",width=246,filled=True,border_color='transparent', bgcolor='white')
+    preco_peca = ft.TextField(hint_text="Preço fixo por Peça",width=246,filled=True,border_color='transparent', bgcolor='white')
     botao_adicionar_peca = ft.ElevatedButton("Adicionar por Peça", on_click=adicionar_por_peca,width=300)
 
     
@@ -317,7 +326,7 @@ def main(page: ft.Page):
         height=370,
         padding=20,
         border_radius=ft.border_radius.all(15),
-        bgcolor=ft.colors.GREEN_200,
+        bgcolor=ft.colors.GREEN_ACCENT_200,
         content=ft.Column(
             controls=[
                 ft.Row([ft.Text('Serviços por peça',color='white',size=25)],alignment='center'),
