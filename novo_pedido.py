@@ -193,6 +193,9 @@ def main(page: ft.Page):
     botao_adicionar_kg = ft.ElevatedButton("Salvar", on_click=adicionar_por_kg,width=200)
 
     tipo_peca_kg = ft.Dropdown(
+        filled=True,
+        border_color='transparent',
+        bgcolor='transparent',
         label="Tipo de Peça",
         options=[ft.dropdown.Option("Bermuda"), ft.dropdown.Option("Camiseta"), ft.dropdown.Option("Cueca"), ft.dropdown.Option("Meia")]
     )
