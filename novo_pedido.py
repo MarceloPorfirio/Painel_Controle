@@ -245,6 +245,7 @@ def main(page: ft.Page):
                         ),
                         ft.Column(
                             controls=[
+                                
                                 lista_detalhes_pecas
                             ]
                         )
