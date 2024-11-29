@@ -14,8 +14,6 @@ def main(page: ft.Page):
         for item in servicos_adicionados:
             if "peca" in item:
                 tabela_pedidos.rows.append(
-                    
-
                     ft.DataRow(cells=[
                         ft.DataCell(ft.Text(item["tipo"])),
                         ft.DataCell(ft.Text(item["peca"])),
@@ -35,7 +33,7 @@ def main(page: ft.Page):
                     ft.DataRow(cells=[
                         ft.DataCell(ft.Text(item["tipo"])),
                         ft.DataCell(ft.Text(f"{item['quantidade_kg']} Kg")),
-                        ft.DataCell(ft.Text(item["quantidade_total"])),
+                        ft.DataCell(ft.Text(f"{item['quantidade_total']}")),  # Exibe a quantidade total de peças
                         ft.DataCell(ft.Text(item["unidade"])),
                         ft.DataCell(ft.Text(f"R$ {item['preco']}")),
                         ft.DataCell(detalhes_button)
@@ -113,6 +111,19 @@ def main(page: ft.Page):
             page.update()
             return  # Sai da função sem continuar
 
+        # Verifica se há peças detalhadas
+        if not pecas_por_kg:
+            page.dialog = ft.AlertDialog(
+                title=ft.Text("Detalhamento obrigatório"),
+                content=ft.Text("Você precisa detalhar as peças antes de adicionar o serviço."),
+                actions=[
+                    ft.TextButton("Fechar", on_click=lambda e: page.dialog.close())
+                ]
+            )
+            page.dialog.open = True
+            page.update()
+            return
+
         try:
             # Converte a quantidade de kg para número e valida
             quantidade_kg_valor = float(quantidade_kg.value)
@@ -143,11 +154,15 @@ def main(page: ft.Page):
         else:
             preco_por_kg = 0.0
 
+        # Calcula a quantidade total de peças
+        quantidade_total = sum(int(p['quantidade']) for p in pecas_por_kg)
+
+
         # Cria o dicionário do serviço
         servico = {
             "tipo": servico_kg.value,
             "quantidade_kg": quantidade_kg.value,
-            "quantidade_total": quantidade_total_pecas.value,
+            "quantidade_total": quantidade_total,  # Adiciona a chave 'quantidade_total'
             "detalhes_pecas": pecas_por_kg.copy(),
             "unidade": "Kg",
             "preco": round(quantidade_kg_valor * preco_por_kg, 2),
@@ -162,13 +177,10 @@ def main(page: ft.Page):
         # Zera os campos dos TextFields
         servico_kg.value = ""
         quantidade_kg.value = ""
-        quantidade_total_pecas.value = ""
 
         # Atualiza os TextFields na interface
         servico_kg.update()
         quantidade_kg.update()
-        quantidade_total_pecas.update()
-
 
 
     def adicionar_por_peca(e):
@@ -192,15 +204,15 @@ def main(page: ft.Page):
         options=[ft.dropdown.Option("Completo"), ft.dropdown.Option("Esfregar"), ft.dropdown.Option("Máquina"), ft.dropdown.Option("Secar")],
     )
     quantidade_kg = ft.TextField(hint_text="Peso (kg)", width=500,filled=True,border_color='transparent', bgcolor='white')
-    quantidade_total_pecas = ft.TextField(hint_text="Total Peças", width=500,filled=True,border_color='transparent', bgcolor='white')
+   
     botao_adicionar_kg = ft.ElevatedButton("Salvar", on_click=adicionar_por_kg,width=200)
 
     tipo_peca_kg = ft.Dropdown(
         filled=True,
         border_color='transparent',
         bgcolor='white',
-        hint_text='Tipo de peça',
-        options=[ft.dropdown.Option("Bermuda"), ft.dropdown.Option("Camiseta"), ft.dropdown.Option("Cueca"), ft.dropdown.Option("Meia")]
+        hint_text='Selecionar',
+        options=[ft.dropdown.Option("Total de Peças"),ft.dropdown.Option("Bermuda"), ft.dropdown.Option("Camiseta"), ft.dropdown.Option("Cueca"), ft.dropdown.Option("Meia")]
     )
     quantidade_peca_kg = ft.TextField(hint_text="Quantidade",filled=True,border_color='transparent', bgcolor='white')
     botao_adicionar_peca_kg = ft.ElevatedButton("Adicionar Peça", on_click=adicionar_peca_por_kg)
@@ -304,7 +316,7 @@ def main(page: ft.Page):
                 ft.Divider(color='transparent'),
                 ft.Row([servico_kg],alignment='center'),
                 ft.Row([quantidade_kg],alignment='center'),
-                ft.Row([quantidade_total_pecas],alignment='center'),
+                
                 ft.Divider(color='transparent'),
                 ft.Row(
                     controls=[
